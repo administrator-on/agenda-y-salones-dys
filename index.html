@@ -3,221 +3,738 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda y Salones DYS</title>
-    <!-- Tailwind CSS para un diseño limpio y profesional -->
+    <title>SALONES DYS & AGENDA DYS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- FullCalendar para el manejo de la agenda -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    
+    <!-- SDKs de Firebase (Compat Version para fácil integración) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
 
-    <!-- Header -->
-    <header class="bg-indigo-700 text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-calendar-days text-2xl"></i>
-                <h1 class="text-xl font-bold">Agenda y Salones DYS</h1>
+    <!-- Header Institucional -->
+    <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="mostrarInicio()">
+                <div class="bg-blue-800 p-2.5 rounded-xl border border-blue-700 shadow-inner">
+                    <i class="fa-solid fa-hospital text-xl text-blue-200"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold leading-tight">Docencia Servicio</h1>
+                    <p class="text-[11px] text-blue-200">Gestión Hospitalaria</p>
+                </div>
             </div>
-            <div id="connection-status" class="text-xs bg-indigo-800 px-3 py-1 rounded-full text-indigo-200">
-                <i class="fa-solid fa-circle text-yellow-400 text-[10px] mr-1"></i> Conectando a Firebase...
-            </div>
+            <button onclick="mostrarInicio()" id="btn-home" class="hidden bg-blue-800 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition items-center space-x-1.5 border border-blue-700">
+                <i class="fa-solid fa-house"></i>
+                <span>Menú Principal</span>
+            </button>
         </div>
     </header>
 
-    <!-- Contenido Principal -->
-    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
-        
-        <!-- Panel Lateral (Salones / Controles) -->
-        <aside class="lg:col-span-1 bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col space-y-6">
-            <div>
-                <h2 class="text-lg font-semibold text-slate-900 mb-2"><i class="fa-solid fa-door-open mr-2 text-indigo-600"></i>Salones Disponibles</h2>
-                <p class="text-xs text-slate-500 mb-4">Selecciona un salón para filtrar o administra los espacios.</p>
-                
-                <!-- Lista de Salones -->
-                <div id="salones-list" class="space-y-2">
-                    <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-sm font-medium text-indigo-900 flex justify-between items-center">
-                        <span>Salón Principal (Auditorio)</span>
-                        <i class="fa-solid fa-check text-indigo-600"></i>
+    <!-- Contenedor Principal -->
+    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- ================================================= -->
+        <!-- MENÚ PRINCIPAL                                    -->
+        <!-- ================================================= -->
+        <div id="vista-inicio" class="space-y-6 py-4">
+            <div class="text-center space-y-2 mb-8">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Panel de Control DYS</h2>
+                <p class="text-sm text-slate-600 max-w-md mx-auto">Seleccione el módulo que desea gestionar:</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                <!-- Módulo Salones DYS -->
+                <div onclick="cambiarModulo('salones')" class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-200 transition cursor-pointer flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">
+                            <i class="fa-solid fa-door-open"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-1">SALONES DYS</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Aparta y controla la disponibilidad sin cruces en los 4 salones. Incluye archivo histórico y exportación Excel.</p>
                     </div>
-                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 cursor-pointer flex justify-between items-center">
-                        <span>Sala de Juntas B</span>
-                        <span class="text-xs text-slate-400">Filtrar</span>
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-emerald-600 text-xs font-bold uppercase tracking-wider">
+                        <span>Ingresar al módulo</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+
+                <!-- Módulo Agenda DYS -->
+                <div onclick="cambiarModulo('agenda')" class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-200 transition cursor-pointer flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:bg-blue-600 group-hover:text-white transition">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-1">AGENDA DYS</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Registro de compromisos, comités y reuniones institucionales. Incluye histórico y exportación Excel.</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-blue-600 text-xs font-bold uppercase tracking-wider">
+                        <span>Ingresar a la agenda</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="border-t pt-4">
-                <button onclick="abrirModalReserva()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg transition shadow-sm flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Nueva Reserva</span>
-                </button>
+        <!-- ================================================= -->
+        <!-- VISTA: SALONES DYS                                -->
+        <!-- ================================================= -->
+        <div id="vista-salones" class="space-y-6 hidden">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-emerald-50 text-emerald-600 p-3 rounded-xl"><i class="fa-solid fa-door-open text-xl"></i></div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-slate-900">SALONES DYS</h2>
+                        <p class="text-xs text-slate-500">Control de espacios y disponibilidad en la nube</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                    <button onclick="toggleHistoricoSalones()" id="btn-hist-salones" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-box-archive"></i>
+                        <span id="txt-btn-hist-s">Ver Histórico Pasados</span>
+                    </button>
+                    <button onclick="exportarExcelSalones()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5" title="Exportar vista actual a Excel">
+                        <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                        <span>Exportar Excel</span>
+                    </button>
+                    <button onclick="abrirModalSalon()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-semibold text-xs shadow-sm transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>Apartar Salón</span>
+                    </button>
+                </div>
             </div>
-        </aside>
 
-        <!-- Calendario -->
-        <section class="lg:col-span-3 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-            <div id='calendar'></div>
-        </section>
+            <!-- Mini tarjetas resumen hoy -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" id="cards-salones-resumen"></div>
+
+            <!-- Filtros -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-3 justify-between items-center">
+                <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                    <select id="filtro-salon-sel" onchange="renderizarSalones()" class="border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none w-full sm:w-auto">
+                        <option value="todos">Todos los salones</option>
+                        <option value="1. Docencia/servicio">1. Docencia / Servicio</option>
+                        <option value="2. salon 1 Archivo">2. Salón 1 Archivo</option>
+                        <option value="3. Salon 2 Archivo">3. Salón 2 Archivo</option>
+                        <option value="4. Salon Sala Archivo">4. Salón Sala Archivo</option>
+                    </select>
+                    <input type="date" id="filtro-salon-fec" onchange="renderizarSalones()" class="border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none w-full sm:w-auto">
+                    <button onclick="resetFiltrosSalones()" class="text-xs text-emerald-700 font-semibold hover:underline px-2 py-1">Limpiar filtros</button>
+                </div>
+                <div class="text-xs text-slate-500">Mostrando: <span id="contador-salones" class="font-bold text-slate-800">0</span></div>
+            </div>
+
+            <div class="space-y-3" id="lista-salones-html"></div>
+            <div id="vacio-salones" class="hidden bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400">
+                <i class="fa-solid fa-calendar-xmark text-4xl mb-2"></i>
+                <p class="text-sm">No hay registros para mostrar.</p>
+            </div>
+        </div>
+
+        <!-- ================================================= -->
+        <!-- VISTA: AGENDA DYS                                 -->
+        <!-- ================================================= -->
+        <div id="vista-agenda" class="space-y-6 hidden">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-50 text-blue-600 p-3 rounded-xl"><i class="fa-solid fa-calendar-days text-xl"></i></div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-slate-900">AGENDA DYS</h2>
+                        <p class="text-xs text-slate-500">Compromisos y comités de jefatura</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                    <button onclick="toggleHistoricoAgenda()" id="btn-hist-agenda" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-box-archive"></i>
+                        <span id="txt-btn-hist-a">Ver Histórico Pasados</span>
+                    </button>
+                    <button onclick="exportarExcelAgenda()" class="bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5" title="Exportar vista actual a Excel">
+                        <i class="fa-solid fa-file-excel text-blue-600"></i>
+                        <span>Exportar Excel</span>
+                    </button>
+                    <button onclick="abrirModalAgenda()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-xs shadow-sm transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                        <span>Programar Evento</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-3 justify-between items-center">
+                <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                    <select id="filtro-agenda-tipo" onchange="renderizarAgenda()" class="border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none w-full sm:w-auto">
+                        <option value="todos">Todos los tipos</option>
+                        <option value="Comité">Comité</option>
+                        <option value="Reunión Universidad">Reunión Universidad</option>
+                        <option value="Capacitación">Capacitación</option>
+                        <option value="Auditoría">Auditoría</option>
+                        <option value="Institucional">Institucional</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                    <input type="date" id="filtro-agenda-fec" onchange="renderizarAgenda()" class="border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none w-full sm:w-auto">
+                    <button onclick="resetFiltrosAgenda()" class="text-xs text-blue-700 font-semibold hover:underline px-2 py-1">Limpiar filtros</button>
+                </div>
+                <div class="text-xs text-slate-500">Mostrando: <span id="contador-agenda" class="font-bold text-slate-800">0</span></div>
+            </div>
+
+            <div class="space-y-3" id="lista-agenda-html"></div>
+            <div id="vacio-agenda" class="hidden bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400">
+                <i class="fa-solid fa-folder-open text-4xl mb-2"></i>
+                <p class="text-sm">No hay eventos para mostrar.</p>
+            </div>
+        </div>
+
     </main>
 
-    <!-- Modal para Nueva Reserva -->
-    <div id="modal-reserva" class="fixed inset-0 bg-slate-900/50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl space-y-4">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-slate-900">Nueva Reserva de Salón</h3>
-                <button onclick="cerrarModalReserva()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+    <!-- MODAL SALÓN -->
+    <div id="modal-salon" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden my-auto">
+            <div class="bg-emerald-700 text-white px-6 py-4 flex justify-between items-center">
+                <h3 id="modal-salon-titulo" class="font-bold text-sm">Apartar Salón</h3>
+                <button onclick="cerrarModalSalon()" class="text-emerald-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            
-            <form id="form-reserva" onsubmit="guardarReserva(event)" class="space-y-4">
+            <form id="form-salon" onsubmit="guardarSalón(event)" class="p-6 space-y-3.5">
+                <input type="hidden" id="ms-id">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Título del Evento / Motivo</label>
-                    <input type="text" id="titulo-evento" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Ej: Reunión de Junta Directiva">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Fecha Inicio</label>
-                        <input type="datetime-local" id="fecha-inicio" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Fecha Fin</label>
-                        <input type="datetime-local" id="fecha-fin" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Salón</label>
-                    <select id="salon-evento" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        <option value="Salón Principal (Auditorio)">Salón Principal (Auditorio)</option>
-                        <option value="Sala de Juntas B">Sala de Juntas B</option>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Salón *</label>
+                    <select id="ms-salon" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none">
+                        <option value="">Seleccione...</option>
+                        <option value="1. Docencia/servicio">1. Docencia / Servicio</option>
+                        <option value="2. salon 1 Archivo">2. Salón 1 Archivo</option>
+                        <option value="3. Salon 2 Archivo">3. Salón 2 Archivo</option>
+                        <option value="4. Salon Sala Archivo">4. Salón Sala Archivo</option>
                     </select>
                 </div>
-
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Responsable</label>
-                    <input type="text" id="responsable-evento" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Nombre del solicitante">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Actividad / Título *</label>
+                    <input type="text" id="ms-titulo" required placeholder="Ej. Capacitación personal" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none">
                 </div>
-
-                <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="cerrarModalReserva()" class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm">Guardar Reserva</button>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Responsable *</label>
+                    <input type="text" id="ms-resp" required placeholder="Ej. Dr. Carlos" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none">
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Fecha *</label>
+                        <input type="date" id="ms-fec" required class="w-full border border-slate-300 rounded-xl px-2.5 py-2 text-xs outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Inicio *</label>
+                        <input type="time" id="ms-ini" required class="w-full border border-slate-300 rounded-xl px-2.5 py-2 text-xs outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Fin *</label>
+                        <input type="time" id="ms-fin" required class="w-full border border-slate-300 rounded-xl px-2.5 py-2 text-xs outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Observaciones</label>
+                    <textarea id="ms-obs" rows="2" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="cerrarModalSalon()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium text-xs">Cancelar</button>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-medium text-xs shadow-sm">Guardar Apartado</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Firebase SDKs (Versión compatible con CDN) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    <!-- MODAL AGENDA -->
+    <div id="modal-agenda" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden my-auto">
+            <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
+                <h3 id="modal-agenda-titulo" class="font-bold text-sm">Programar Evento</h3>
+                <button onclick="cerrarModalAgenda()" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-agenda" onsubmit="guardarEvento(event)" class="p-6 space-y-3.5">
+                <input type="hidden" id="ma-id">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Título del Evento *</label>
+                    <input type="text" id="ma-titulo" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Tipo *</label>
+                        <select id="ma-tipo" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none">
+                            <option value="Comité">Comité</option>
+                            <option value="Reunión Universidad">Reunión Universidad</option>
+                            <option value="Capacitación">Capacitación</option>
+                            <option value="Auditoría">Auditoría</option>
+                            <option value="Institucional">Institucional</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Lugar / Salón</label>
+                        <input type="text" id="ma-lugar" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Fecha *</label>
+                        <input type="date" id="ma-fec" required class="w-full border border-slate-300 rounded-xl px-2 py-2 text-xs outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Hora *</label>
+                        <input type="time" id="ma-hora" required class="w-full border border-slate-300 rounded-xl px-2 py-2 text-xs outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Duración</label>
+                        <input type="text" id="ma-dur" class="w-full border border-slate-300 rounded-xl px-2 py-2 text-xs outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Notas / Detalles</label>
+                    <textarea id="ma-notas" rows="2" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="cerrarModalAgenda()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium text-xs">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium text-xs shadow-sm">Guardar Evento</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-3 text-center text-[11px] text-slate-400">
+        SALONES DYS & AGENDA DYS &middot; Hospital
+    </footer>
+
+    <!-- Lógica JavaScript con Firebase Realtime Database -->
+    <script>
         // ==========================================
-        // TUS CREDENCIALES DE FIREBASE (Configuradas)
+        // 1. CONFIGURACIÓN DE FIREBASE (¡REEMPLAZA AQUÍ TUS DATOS!)
         // ==========================================
         const firebaseConfig = {
-            apiKey: "AIzaSyC9U9LMBrV9OLWIMcixjRqzswxn2DXm-F4",
-            authDomain: "agenda-y-salon-dys.firebaseapp.com",
-            databaseURL: "https://agenda-y-salon-dys-default-rtdb.firebaseio.com",
-            projectId: "agenda-y-salon-dys",
-            storageBucket: "agenda-y-salon-dys.appspot.com",
-            messagingSenderId: "984906360149",
-            appId: "1:984906360149:web:5d9c1ffa97d7ab559e7bdc",
-            measurementId: "G-K5DZ6CNZV7"
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_DOMINIO.firebaseapp.com",
+            databaseURL: "https://TU_BASE_DE_DATOS.firebaseio.com",
+            projectId: "TU_PROJECT_ID",
+            storageBucket: "TU_BUCKET.appspot.com",
+            messagingSenderId: "TU_SENDER_ID",
+            appId: "TU_APP_ID"
         };
 
         // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        // Actualizar indicador de estado
-        const statusEl = document.getElementById('connection-status');
-        statusEl.innerHTML = `<i class="fa-solid fa-circle text-emerald-400 text-[10px] mr-1"></i> Conectado a Firebase`;
+        const listaSalones = [
+            "1. Docencia/servicio",
+            "2. salon 1 Archivo",
+            "3. Salon 2 Archivo",
+            "4. Salon Sala Archivo"
+        ];
 
-        let calendar;
+        let reservasSalones = [];
+        let eventosAgenda = [];
 
-        // Inicializar FullCalendar
-        document.addEventListener('DOMContentLoaded', function() {
-            const calendarEl = document.getElementById('calendar');
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                locale: 'es',
-                initialView: 'dayGridMonth',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                events: [],
-                eventClick: function(info) {
-                    if (confirm(`¿Deseas eliminar la reserva: "${info.event.title}"?`)) {
-                        const eventoId = info.event.id;
-                        remove(ref(db, 'reservas/' + eventoId)).then(() => {
-                            alert('Reserva eliminada con éxito.');
-                        }).catch((error) => {
-                            alert('Error al eliminar: ' + error.message);
-                        });
-                    }
-                }
-            });
-            calendar.render();
+        let verHistoricoSalones = false;
+        let verHistoricoAgenda = false;
 
-            // Escuchar cambios en Realtime Database en tiempo real
-            const reservasRef = ref(db, 'reservas');
-            onValue(reservasRef, (snapshot) => {
-                const data = snapshot.val();
-                const eventos = [];
-                if (data) {
-                    Object.keys(data).forEach(key => {
-                        const item = data[key];
-                        eventos.push({
-                            id: key,
-                            title: `${item.titulo} (${item.salon})`,
-                            start: item.inicio,
-                            end: item.fin,
-                            backgroundColor: item.salon === 'Salón Principal (Auditorio)' ? '#4f46e5' : '#0ea5e9',
-                            borderColor: item.salon === 'Salón Principal (Auditorio)' ? '#4338ca' : '#0284c7'
-                        });
-                    });
-                }
-                calendar.removeAllEvents();
-                calendar.addEventSource(eventos);
-            });
+        // Escuchar datos en tiempo real desde Firebase
+        db.ref('salones').on('value', (snapshot) => {
+            const data = snapshot.val();
+            reservasSalones = data ? Object.values(data) : [];
+            if (!document.getElementById('vista-salones').classList.contains('hidden')) {
+                renderizarCardsResumenSalones();
+                renderizarSalones();
+            }
         });
 
-        // Funciones globales para el modal y formulario
-        window.abrirModalReserva = function() {
-            document.getElementById('modal-reserva').classList.remove('hidden');
+        db.ref('agenda').on('value', (snapshot) => {
+            const data = snapshot.val();
+            eventosAgenda = data ? Object.values(data) : [];
+            if (!document.getElementById('vista-agenda').classList.contains('hidden')) {
+                renderizarAgenda();
+            }
+        });
+
+        function cambiarModulo(mod) {
+            document.getElementById('vista-inicio').classList.add('hidden');
+            document.getElementById('vista-salones').classList.add('hidden');
+            document.getElementById('vista-agenda').classList.add('hidden');
+            document.getElementById('btn-home').classList.remove('hidden');
+
+            if (mod === 'salones') {
+                document.getElementById('vista-salones').classList.remove('hidden');
+                verHistoricoSalones = false;
+                actualizarBotonHistSalones();
+                renderizarCardsResumenSalones();
+                renderizarSalones();
+            } else if (mod === 'agenda') {
+                document.getElementById('vista-agenda').classList.remove('hidden');
+                verHistoricoAgenda = false;
+                actualizarBotonHistAgenda();
+                renderizarAgenda();
+            }
         }
 
-        window.cerrarModalReserva = function() {
-            document.getElementById('modal-reserva').classList.add('hidden');
-            document.getElementById('form-reserva').reset();
+        function mostrarInicio() {
+            document.getElementById('vista-inicio').classList.remove('hidden');
+            document.getElementById('vista-salones').classList.add('hidden');
+            document.getElementById('vista-agenda').classList.add('hidden');
+            document.getElementById('btn-home').classList.add('hidden');
         }
 
-        window.guardarReserva = function(e) {
+        // SALONES DYS
+        function abrirModalSalon(id = null) {
+            document.getElementById('modal-salon').classList.remove('hidden');
+            document.getElementById('form-salon').reset();
+            document.getElementById('ms-id').value = '';
+
+            if (id) {
+                document.getElementById('modal-salon-titulo').innerText = 'Modificar Apartado';
+                const r = reservasSalones.find(x => x.id === id);
+                if (r) {
+                    document.getElementById('ms-id').value = r.id;
+                    document.getElementById('ms-salon').value = r.salon;
+                    document.getElementById('ms-titulo').value = r.titulo;
+                    document.getElementById('ms-resp').value = r.resp;
+                    document.getElementById('ms-fec').value = r.fec;
+                    document.getElementById('ms-ini').value = r.ini;
+                    document.getElementById('ms-fin').value = r.fin;
+                    document.getElementById('ms-obs').value = r.obs;
+                }
+            } else {
+                document.getElementById('modal-salon-titulo').innerText = 'Apartar Salón';
+                document.getElementById('ms-fec').value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        function cerrarModalSalon() { document.getElementById('modal-salon').classList.add('hidden'); }
+
+        function guardarSalón(e) {
             e.preventDefault();
-            const titulo = document.getElementById('titulo-evento').value;
-            const inicio = document.getElementById('fecha-inicio').value;
-            const fin = document.getElementById('fecha-fin').value;
-            const salon = document.getElementById('salon-evento').value;
-            const responsable = document.getElementById('responsable-evento').value;
+            const id = document.getElementById('ms-id').value || Date.now().toString();
+            const salon = document.getElementById('ms-salon').value;
+            const titulo = document.getElementById('ms-titulo').value;
+            const resp = document.getElementById('ms-resp').value;
+            const fec = document.getElementById('ms-fec').value;
+            const ini = document.getElementById('ms-ini').value;
+            const fin = document.getElementById('ms-fin').value;
+            const obs = document.getElementById('ms-obs').value;
 
-            const nuevaReservaRef = ref(db, 'reservas');
-            push(nuevaReservaRef, {
-                titulo,
-                inicio,
-                fin,
-                salon,
-                responsable
-            }).then(() => {
-                cerrarModalReserva();
-                alert('¡Reserva guardada correctamente!');
-            }).catch((error) => {
-                alert('Hubo un error al guardar: ' + error.message);
+            if (ini >= fin) { alert('La hora de fin debe ser mayor a la hora de inicio.'); return; }
+
+            const hayCruce = reservasSalones.some(r => {
+                if (r.id === id) return false;
+                if (r.salon === salon && r.fec === fec && r.estado !== 'Cancelado') {
+                    if (ini < r.fin && fin > r.ini) return true;
+                }
+                return false;
             });
+
+            if (hayCruce) { alert(`⚠️ CONFLICTO: El salón "${salon}" ya está apartado en ese horario el día ${fec}.`); return; }
+
+            const objSalon = { id, salon, titulo, resp, fec, ini, fin, obs, estado: 'Confirmado' };
+
+            db.ref('salones/' + id).set(objSalon, (error) => {
+                if (error) {
+                    alert('Error al guardar en la nube.');
+                } else {
+                    cerrarModalSalon();
+                }
+            });
+        }
+
+        function eliminarSalon(id) {
+            if (confirm('¿Eliminar este registro?')) {
+                db.ref('salones/' + id).remove();
+            }
+        }
+
+        function toggleHistoricoSalones() {
+            verHistoricoSalones = !verHistoricoSalones;
+            actualizarBotonHistSalones();
+            renderizarSalones();
+        }
+
+        function actualizarBotonHistSalones() {
+            const btn = document.getElementById('btn-hist-salones');
+            const txt = document.getElementById('txt-btn-hist-s');
+            if (verHistoricoSalones) {
+                btn.className = "bg-emerald-800 text-white px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5 shadow-inner";
+                txt.innerText = "Ver Vigentes / Activos";
+            } else {
+                btn.className = "bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5";
+                txt.innerText = "Ver Histórico Pasados";
+            }
+        }
+
+        function resetFiltrosSalones() {
+            document.getElementById('filtro-salon-sel').value = 'todos';
+            document.getElementById('filtro-salon-fec').value = '';
+            renderizarSalones();
+        }
+
+        function exportarExcelSalones() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const fSel = document.getElementById('filtro-salon-sel').value;
+            const fFec = document.getElementById('filtro-salon-fec').value;
+
+            let filtrados = reservasSalones.filter(r => {
+                const esPasado = r.fec < hoy;
+                if (verHistoricoSalones && !esPasado) return false;
+                if (!verHistoricoSalones && esPasado) return false;
+                if (fSel !== 'todos' && r.salon !== fSel) return false;
+                if (fFec && r.fec !== fFec) return false;
+                return true;
+            });
+
+            if (filtrados.length === 0) { alert('No hay datos para exportar con los filtros actuales.'); return; }
+
+            let csv = '\ufeffSalón,Actividad / Título,Responsable,Fecha,Hora Inicio,Hora Fin,Estado,Observaciones\n';
+            filtrados.forEach(r => {
+                csv += `"${r.salon}","${r.titulo.replace(/"/g, '""')}","${r.resp.replace(/"/g, '""')}","${r.fec}","${r.ini}","${r.fin}","${r.estado}","${(r.obs || '').replace(/"/g, '""')}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Salones_DYS_${verHistoricoSalones ? 'Historico' : 'Vigentes'}_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        function renderizarCardsResumenSalones() {
+            const cont = document.getElementById('cards-salones-resumen');
+            const hoy = new Date().toISOString().split('T')[0];
+
+            cont.innerHTML = listaSalones.map(s => {
+                const ocupado = reservasSalones.find(r => r.salon === s && r.fec === hoy && r.estado === 'Confirmado');
+                let badge = ocupado ? 
+                    `<div class="mt-2 text-[11px] bg-amber-50 text-amber-800 p-2 rounded-xl border border-amber-200"><span class="font-bold">Ocupado hoy:</span> ${ocupado.ini}-${ocupado.fin}</div>` :
+                    `<div class="mt-2 text-[11px] bg-emerald-50 text-emerald-800 p-2 rounded-xl border border-emerald-200 font-medium"><i class="fa-solid fa-check mr-1"></i>Disponible hoy</div>`;
+
+                return `<div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200"><div class="text-[11px] font-bold text-slate-400 uppercase">Salón</div><div class="font-bold text-slate-800 text-xs mt-0.5 truncate">${s}</div>${badge}</div>`;
+            }).join('');
+        }
+
+        function renderizarSalones() {
+            const fSel = document.getElementById('filtro-salon-sel').value;
+            const fFec = document.getElementById('filtro-salon-fec').value;
+            const lista = document.getElementById('lista-salones-html');
+            const vacio = document.getElementById('vacio-salones');
+            const hoy = new Date().toISOString().split('T')[0];
+
+            let filtrados = reservasSalones.filter(r => {
+                const esPasado = r.fec < hoy;
+                if (verHistoricoSalones && !esPasado) return false;
+                if (!verHistoricoSalones && esPasado) return false;
+
+                if (fSel !== 'todos' && r.salon !== fSel) return false;
+                if (fFec && r.fec !== fFec) return false;
+                return true;
+            });
+
+            filtrados.sort((a, b) => a.fec.localeCompare(b.fec) || a.ini.localeCompare(b.ini));
+            document.getElementById('contador-salones').innerText = filtrados.length;
+
+            if (filtrados.length === 0) {
+                lista.innerHTML = '';
+                vacio.classList.remove('hidden');
+                return;
+            }
+            vacio.classList.add('hidden');
+
+            lista.innerHTML = filtrados.map(r => {
+                const badge = r.estado === 'Confirmado' ? 
+                    '<span class="px-2.5 py-0.5 text-[10px] font-bold bg-emerald-100 text-emerald-800 rounded-full">Confirmado</span>' : 
+                    '<span class="px-2.5 py-0.5 text-[10px] font-bold bg-rose-100 text-rose-800 rounded-full">Cancelado</span>';
+
+                return `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">${r.salon}</span>
+                                ${badge}
+                                ${r.fec < hoy ? '<span class="px-2 py-0.5 text-[9px] bg-slate-100 text-slate-500 rounded font-semibold">Histórico Pasado</span>' : ''}
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-sm">${r.titulo}</h4>
+                            <div class="text-xs text-slate-500 flex flex-wrap gap-x-3 gap-y-0.5">
+                                <span><i class="fa-regular fa-user mr-1"></i>${r.resp}</span>
+                                <span><i class="fa-regular fa-calendar mr-1"></i>${r.fec}</span>
+                                <span><i class="fa-regular fa-clock mr-1"></i>${r.ini} - ${r.fin}</span>
+                            </div>
+                            ${r.obs ? `<div class="text-xs text-slate-400 italic">${r.obs}</div>` : ''}
+                        </div>
+                        <div class="flex items-center space-x-1.5 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                            <button onclick="abrirModalSalon('${r.id}')" class="p-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl text-xs" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="eliminarSalon('${r.id}')" class="p-2 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-xl text-xs" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        // AGENDA DYS
+        function abrirModalAgenda(id = null) {
+            document.getElementById('modal-agenda').classList.remove('hidden');
+            document.getElementById('form-agenda').reset();
+            document.getElementById('ma-id').value = '';
+
+            if (id) {
+                document.getElementById('modal-agenda-titulo').innerText = 'Modificar Evento';
+                const ev = eventosAgenda.find(x => x.id === id);
+                if (ev) {
+                    document.getElementById('ma-id').value = ev.id;
+                    document.getElementById('ma-titulo').value = ev.titulo;
+                    document.getElementById('ma-tipo').value = ev.tipo;
+                    document.getElementById('ma-lugar').value = ev.lugar;
+                    document.getElementById('ma-fec').value = ev.fec;
+                    document.getElementById('ma-hora').value = ev.hora;
+                    document.getElementById('ma-dur').value = ev.dur;
+                    document.getElementById('ma-notas').value = ev.notas;
+                }
+            } else {
+                document.getElementById('modal-agenda-titulo').innerText = 'Programar Evento';
+                document.getElementById('ma-fec').value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        function cerrarModalAgenda() { document.getElementById('modal-agenda').classList.add('hidden'); }
+
+        function guardarEvento(e) {
+            e.preventDefault();
+            const id = document.getElementById('ma-id').value || Date.now().toString();
+            const titulo = document.getElementById('ma-titulo').value;
+            const tipo = document.getElementById('ma-tipo').value;
+            const lugar = document.getElementById('ma-lugar').value;
+            const fec = document.getElementById('ma-fec').value;
+            const hora = document.getElementById('ma-hora').value;
+            const dur = document.getElementById('ma-dur').value;
+            const notas = document.getElementById('ma-notas').value;
+
+            const eventoExistente = eventosAgenda.find(x => x.id === id);
+            const estado = eventoExistente ? eventoExistente.estado : 'Programado';
+
+            const objEvento = { id, titulo, tipo, lugar, fec, hora, dur, notas, estado };
+
+            db.ref('agenda/' + id).set(objEvento, (error) => {
+                if (error) {
+                    alert('Error al guardar evento.');
+                } else {
+                    cerrarModalAgenda();
+                }
+            });
+        }
+
+        function cambiarEstadoEvento(id, est) {
+            db.ref('agenda/' + id + '/estado').set(est);
+        }
+
+        function eliminarEvento(id) {
+            if (confirm('¿Eliminar este evento?')) {
+                db.ref('agenda/' + id).remove();
+            }
+        }
+
+        function toggleHistoricoAgenda() {
+            verHistoricoAgenda = !verHistoricoAgenda;
+            actualizarBotonHistAgenda();
+            renderizarAgenda();
+        }
+
+        function actualizarBotonHistAgenda() {
+            const btn = document.getElementById('btn-hist-agenda');
+            const txt = document.getElementById('txt-btn-hist-a');
+            if (verHistoricoAgenda) {
+                btn.className = "bg-blue-800 text-white px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5 shadow-inner";
+                txt.innerText = "Ver Vigentes / Activos";
+            } else {
+                btn.className = "bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5";
+                txt.innerText = "Ver Histórico Pasados";
+            }
+        }
+
+        function resetFiltrosAgenda() {
+            document.getElementById('filtro-agenda-tipo').value = 'todos';
+            document.getElementById('filtro-agenda-fec').value = '';
+            renderizarAgenda();
+        }
+
+        function exportarExcelAgenda() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const fTipo = document.getElementById('filtro-agenda-tipo').value;
+            const fFec = document.getElementById('filtro-agenda-fec').value;
+
+            let filtrados = eventosAgenda.filter(ev => {
+                const esPasado = ev.fec < hoy;
+                if (verHistoricoAgenda && !esPasado) return false;
+                if (!verHistoricoAgenda && esPasado) return false;
+                if (fTipo !== 'todos' && ev.tipo !== fTipo) return false;
+                if (fFec && ev.fec !== fFec) return false;
+                return true;
+            });
+
+            if (filtrados.length === 0) { alert('No hay eventos para exportar con los filtros actuales.'); return; }
+
+            let csv = '\ufeffTipo,Título del Evento,Lugar,Fecha,Hora,Duración,Estado,Notas\n';
+            filtrados.forEach(ev => {
+                csv += `"${ev.tipo}","${ev.titulo.replace(/"/g, '""')}","${(ev.lugar || '').replace(/"/g, '""')}","${ev.fec}","${ev.hora}","${(ev.dur || '').replace(/"/g, '""')}","${ev.estado}","${(ev.notas || '').replace(/"/g, '""')}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Agenda_DYS_${verHistoricoAgenda ? 'Historico' : 'Vigentes'}_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        function renderizarAgenda() {
+            const fTipo = document.getElementById('filtro-agenda-tipo').value;
+            const fFec = document.getElementById('filtro-agenda-fec').value;
+            const lista = document.getElementById('lista-agenda-html');
+            const vacio = document.getElementById('vacio-agenda');
+            const hoy = new Date().toISOString().split('T')[0];
+
+            let filtrados = eventosAgenda.filter(ev => {
+                const esPasado = ev.fec < hoy;
+                if (verHistoricoAgenda && !esPasado) return false;
+                if (!verHistoricoAgenda && esPasado) return false;
+
+                if (fTipo !== 'todos' && ev.tipo !== fTipo) return false;
+                if (fFec && ev.fec !== fFec) return false;
+                return true;
+            });
+
+            filtrados.sort((a, b) => a.fec.localeCompare(b.fec) || a.hora.localeCompare(b.hora));
+            document.getElementById('contador-agenda').innerText = filtrados.length;
+
+            if (filtrados.length === 0) {
+                lista.innerHTML = '';
+                vacio.classList.remove('hidden');
+                return;
+            }
+            vacio.classList.add('hidden');
+
+            lista.innerHTML = filtrados.map(ev => {
+                let badge = '<span class="px-2.5 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-800 rounded-full">Programado</span>';
+                if (ev.estado === 'Completado') badge = '<span class="px-2.5 py-0.5 text-[10px] font-bold bg-emerald-100 text-emerald-800 rounded-full">Realizado</span>';
+                if (ev.estado === 'Cancelado') badge = '<span class="px-2.5 py-0.5 text-[10px] font-bold bg-rose-100 text-rose-800 rounded-full">Cancelado</span>';
+
+                return `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">${ev.tipo}</span>
+                                ${badge}
+                                ${ev.fec < hoy ? '<span class="px-2 py-0.5 text-[9px] bg-slate-100 text-slate-500 rounded font-semibold">Histórico Culminado</span>' : ''}
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-sm">${ev.titulo}</h4>
+                            <div class="text-xs text-slate-500 flex flex-wrap gap-x-3 gap-y-0.5">
+                                <span><i class="fa-regular fa-calendar mr-1"></i>${ev.fec}</span>
+                                <span><i class="fa-regular fa-clock mr-1"></i>${ev.hora} ${ev.dur ? '('+ev.dur+')' : ''}</span>
+                                <span><i class="fa-solid fa-location-dot mr-1"></i>${ev.lugar || 'No especificado'}</span>
+                            </div>
+                            ${ev.notas ? `<div class="text-xs text-slate-400 italic">${ev.notas}</div>` : ''}
+                        </div>
+                        <div class="flex items-center space-x-1.5 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                            <button onclick="abrirModalAgenda('${ev.id}')" class="p-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl text-xs" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            ${ev.estado !== 'Completado' ? `<button onclick="cambiarEstadoEvento('${ev.id}', 'Completado')" class="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-xl text-xs" title="Marcar Realizado"><i class="fa-solid fa-check"></i></button>` : ''}
+                            <button onclick="eliminarEvento('${ev.id}')" class="p-2 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-xl text-xs" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
+            }).join('');
         }
     </script>
 </body>
