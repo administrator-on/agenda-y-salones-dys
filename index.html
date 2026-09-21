@@ -7,13 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- SDKs de Firebase (Compat Version para fácil integración) -->
+    <!-- SDKs de Firebase (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
 
-    <!-- Header Institucional -->
+    <!-- Toast / Notificaciones flotantes -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col space-y-2 max-w-sm w-full pointer-events-none"></div>
+
     <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-40">
         <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="mostrarInicio()">
@@ -32,12 +34,12 @@
         </div>
     </header>
 
-    <!-- Contenedor Principal -->
+    <!-- Contenedor de Alertas / Notificaciones Próximas -->
+    <div id="contenedor-alertas" class="max-w-5xl mx-auto px-4 w-full mt-4 space-y-2"></div>
+
     <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
 
-        <!-- ================================================= -->
-        <!-- MENÚ PRINCIPAL                                    -->
-        <!-- ================================================= -->
+        <!-- MENÚ PRINCIPAL -->
         <div id="vista-inicio" class="space-y-6 py-4">
             <div class="text-center space-y-2 mb-8">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Panel de Control DYS</h2>
@@ -45,7 +47,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-                <!-- Módulo Salones DYS -->
                 <div onclick="cambiarModulo('salones')" class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-200 transition cursor-pointer flex flex-col justify-between group">
                     <div>
                         <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">
@@ -60,14 +61,13 @@
                     </div>
                 </div>
 
-                <!-- Módulo Agenda DYS -->
                 <div onclick="cambiarModulo('agenda')" class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-200 transition cursor-pointer flex flex-col justify-between group">
                     <div>
                         <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:bg-blue-600 group-hover:text-white transition">
                             <i class="fa-solid fa-calendar-days"></i>
                         </div>
                         <h3 class="text-lg font-bold text-slate-800 mb-1">AGENDA DYS</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed">Registro de compromisos, comités y reuniones institucionales. Incluye histórico y exportación Excel.</p>
+                        <p class="text-xs text-slate-500 leading-relaxed">Registro de compromisos, comités y reuniones institucionales con alertas de vencimiento.</p>
                     </div>
                     <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-blue-600 text-xs font-bold uppercase tracking-wider">
                         <span>Ingresar a la agenda</span>
@@ -77,9 +77,6 @@
             </div>
         </div>
 
-        <!-- ================================================= -->
-        <!-- VISTA: SALONES DYS                                -->
-        <!-- ================================================= -->
         <div id="vista-salones" class="space-y-6 hidden">
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
                 <div class="flex items-center space-x-3">
@@ -94,7 +91,7 @@
                         <i class="fa-solid fa-box-archive"></i>
                         <span id="txt-btn-hist-s">Ver Histórico Pasados</span>
                     </button>
-                    <button onclick="exportarExcelSalones()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5" title="Exportar vista actual a Excel">
+                    <button onclick="exportarExcelSalones()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5">
                         <i class="fa-solid fa-file-excel text-emerald-600"></i>
                         <span>Exportar Excel</span>
                     </button>
@@ -105,10 +102,8 @@
                 </div>
             </div>
 
-            <!-- Mini tarjetas resumen hoy -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" id="cards-salones-resumen"></div>
 
-            <!-- Filtros -->
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-3 justify-between items-center">
                 <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
                     <select id="filtro-salon-sel" onchange="renderizarSalones()" class="border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none w-full sm:w-auto">
@@ -131,9 +126,6 @@
             </div>
         </div>
 
-        <!-- ================================================= -->
-        <!-- VISTA: AGENDA DYS                                 -->
-        <!-- ================================================= -->
         <div id="vista-agenda" class="space-y-6 hidden">
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
                 <div class="flex items-center space-x-3">
@@ -148,7 +140,7 @@
                         <i class="fa-solid fa-box-archive"></i>
                         <span id="txt-btn-hist-a">Ver Histórico Pasados</span>
                     </button>
-                    <button onclick="exportarExcelAgenda()" class="bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5" title="Exportar vista actual a Excel">
+                    <button onclick="exportarExcelAgenda()" class="bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 px-3 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1.5">
                         <i class="fa-solid fa-file-excel text-blue-600"></i>
                         <span>Exportar Excel</span>
                     </button>
@@ -159,7 +151,6 @@
                 </div>
             </div>
 
-            <!-- Filtros -->
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-3 justify-between items-center">
                 <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
                     <select id="filtro-agenda-tipo" onchange="renderizarAgenda()" class="border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none w-full sm:w-auto">
@@ -191,9 +182,9 @@
         <div class="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden my-auto">
             <div class="bg-emerald-700 text-white px-6 py-4 flex justify-between items-center">
                 <h3 id="modal-salon-titulo" class="font-bold text-sm">Apartar Salón</h3>
-                <button onclick="cerrarModalSalon()" class="text-emerald-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" onclick="cerrarModalSalon()" class="text-emerald-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form id="form-salon" onsubmit="guardarSalón(event)" class="p-6 space-y-3.5">
+            <form id="form-salon" onsubmit="guardarSalon(event)" class="p-6 space-y-3.5">
                 <input type="hidden" id="ms-id">
                 <div>
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Salón *</label>
@@ -233,7 +224,9 @@
                 </div>
                 <div class="flex justify-end space-x-2 pt-2">
                     <button type="button" onclick="cerrarModalSalon()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium text-xs">Cancelar</button>
-                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-medium text-xs shadow-sm">Guardar Apartado</button>
+                    <button type="submit" id="btn-submit-salon" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-medium text-xs shadow-sm flex items-center space-x-2">
+                        <span>Guardar Apartado</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -244,7 +237,7 @@
         <div class="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden my-auto">
             <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
                 <h3 id="modal-agenda-titulo" class="font-bold text-sm">Programar Evento</h3>
-                <button onclick="cerrarModalAgenda()" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" onclick="cerrarModalAgenda()" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form id="form-agenda" onsubmit="guardarEvento(event)" class="p-6 space-y-3.5">
                 <input type="hidden" id="ma-id">
@@ -275,12 +268,12 @@
                         <input type="date" id="ma-fec" required class="w-full border border-slate-300 rounded-xl px-2 py-2 text-xs outline-none">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Hora *</label>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Inicio *</label>
                         <input type="time" id="ma-hora" required class="w-full border border-slate-300 rounded-xl px-2 py-2 text-xs outline-none">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Duración</label>
-                        <input type="text" id="ma-dur" class="w-full border border-slate-300 rounded-xl px-2 py-2 text-xs outline-none">
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Hora Fin *</label>
+                        <input type="time" id="ma-fin" required class="w-full border border-slate-300 rounded-xl px-2 py-2 text-xs outline-none">
                     </div>
                 </div>
                 <div>
@@ -289,7 +282,9 @@
                 </div>
                 <div class="flex justify-end space-x-2 pt-2">
                     <button type="button" onclick="cerrarModalAgenda()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium text-xs">Cancelar</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium text-xs shadow-sm">Guardar Evento</button>
+                    <button type="submit" id="btn-submit-agenda" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium text-xs shadow-sm flex items-center space-x-2">
+                        <span>Guardar Evento</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -300,23 +295,22 @@
         SALONES DYS & AGENDA DYS &middot; Hospital
     </footer>
 
-    <!-- Lógica JavaScript con Firebase Realtime Database -->
     <script>
-        // ==========================================
-        // 1. CONFIGURACIÓN DE FIREBASE (¡REEMPLAZA AQUÍ TUS DATOS!)
-        // ==========================================
         const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "TU_DOMINIO.firebaseapp.com",
-            databaseURL: "https://TU_BASE_DE_DATOS.firebaseio.com",
-            projectId: "TU_PROJECT_ID",
-            storageBucket: "TU_BUCKET.appspot.com",
-            messagingSenderId: "TU_SENDER_ID",
-            appId: "TU_APP_ID"
+            apiKey: "AIzaSyC9u9LMBrV9OLWIMcixjRqzswxn2DXm-F4",
+            authDomain: "agenda-y-salon-dys.firebaseapp.com",
+            databaseURL: "https://agenda-y-salon-dys-default-rtdb.firebaseio.com",
+            projectId: "agenda-y-salon-dys",
+            storageBucket: "agenda-y-salon-dys.firebasestorage.app",
+            messagingSenderId: "984906360149",
+            appId: "1:984906360149:web:5d9c1ffa97d7ab559e7bdc",
+            measurementId: "G-K5DZ6CNZV7"
         };
 
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
+        // Inicialización segura de Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
 
         const listaSalones = [
@@ -328,28 +322,77 @@
 
         let reservasSalones = [];
         let eventosAgenda = [];
-
         let verHistoricoSalones = false;
         let verHistoricoAgenda = false;
 
-        // Escuchar datos en tiempo real desde Firebase
+        // Función para mostrar notificaciones estilo toast
+        function mostrarToast(mensaje, tipo = 'exito') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colorClass = tipo === 'exito' ? 'bg-emerald-800 text-white border-emerald-900' : 'bg-rose-800 text-white border-rose-900';
+            const icono = tipo === 'exito' ? 'fa-circle-check' : 'fa-circle-exclamation';
+
+            toast.className = `pointer-events-auto p-3.5 rounded-2xl border shadow-xl flex items-center space-x-3 text-xs transition-all duration-300 transform translate-y-2 opacity-0 ${colorClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icono} text-base"></i>
+                <span class="font-medium">${mensaje}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Corrección principal: Mapear el 'key' de Firebase dentro del objeto JavaScript para asegurar disponibilidad de r.id / ev.id
         db.ref('salones').on('value', (snapshot) => {
             const data = snapshot.val();
-            reservasSalones = data ? Object.values(data) : [];
+            if (data) {
+                reservasSalones = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                }));
+            } else {
+                reservasSalones = [];
+            }
+
             if (!document.getElementById('vista-salones').classList.contains('hidden')) {
                 renderizarCardsResumenSalones();
                 renderizarSalones();
             }
+            generarAlertasProximas();
+        }, (error) => {
+            console.error("Error al leer 'salones':", error);
+            mostrarToast("Error al obtener datos de salones de Firebase", "error");
         });
 
         db.ref('agenda').on('value', (snapshot) => {
             const data = snapshot.val();
-            eventosAgenda = data ? Object.values(data) : [];
+            if (data) {
+                eventosAgenda = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                }));
+            } else {
+                eventosAgenda = [];
+            }
+
             if (!document.getElementById('vista-agenda').classList.contains('hidden')) {
                 renderizarAgenda();
             }
+            generarAlertasProximas();
+        }, (error) => {
+            console.error("Error al leer 'agenda':", error);
+            mostrarToast("Error al obtener datos de agenda de Firebase", "error");
         });
 
+        // Navegación de vistas
         function cambiarModulo(mod) {
             document.getElementById('vista-inicio').classList.add('hidden');
             document.getElementById('vista-salones').classList.add('hidden');
@@ -375,9 +418,56 @@
             document.getElementById('vista-salones').classList.add('hidden');
             document.getElementById('vista-agenda').classList.add('hidden');
             document.getElementById('btn-home').classList.add('hidden');
+            generarAlertasProximas();
         }
 
-        // SALONES DYS
+        function generarAlertasProximas() {
+            const contenedor = document.getElementById('contenedor-alertas');
+            if (!contenedor) return;
+            contenedor.innerHTML = '';
+
+            const hoyStr = new Date().toISOString().split('T')[0];
+            const hoy = new Date(hoyStr + 'T00:00:00');
+
+            let alertasHTML = [];
+
+            let itemsAEvaluar = [
+                ...reservasSalones.filter(r => r.estado === 'Confirmado').map(r => ({tipoItem: 'Salón', titulo: r.titulo, fecha: r.fec, detalle: r.salon})),
+                ...eventosAgenda.filter(e => e.estado !== 'Cancelado' && e.estado !== 'Completado').map(e => ({tipoItem: 'Agenda', titulo: e.titulo, fecha: e.fec, detalle: e.tipo}))
+            ];
+
+            itemsAEvaluar.forEach(item => {
+                if(!item.fecha) return;
+                const fechaEv = new Date(item.fecha + 'T00:00:00');
+                const diferenciaDias = Math.round((fechaEv - hoy) / (1000 * 60 * 60 * 24));
+
+                let mensajeAlerta = '';
+                let colorClase = '';
+
+                if (diferenciaDias === 0) {
+                    mensajeAlerta = `⚠️ <strong>¡ES HOY!</strong> (${item.tipoItem}) ${item.titulo} (${item.detalle})`;
+                    colorClase = 'bg-amber-50 border-amber-300 text-amber-900';
+                } else if (diferenciaDias === 1) {
+                    mensajeAlerta = `🔔 <strong>MAÑANA:</strong> (${item.tipoItem}) ${item.titulo} (${item.detalle})`;
+                    colorClase = 'bg-blue-50 border-blue-300 text-blue-900';
+                } else if (diferenciaDias === 2) {
+                    mensajeAlerta = `ℹ️ <strong>EN 2 DÍAS:</strong> (${item.tipoItem}) ${item.titulo} (${item.detalle})`;
+                    colorClase = 'bg-slate-50 border-slate-300 text-slate-800';
+                }
+
+                if (mensajeAlerta) {
+                    alertasHTML.push(`
+                        <div class="p-3 rounded-xl border text-xs flex justify-between items-center shadow-sm ${colorClase}">
+                            <div>${mensajeAlerta} — <span class="font-semibold">Fecha: ${item.fecha}</span></div>
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-white/60 rounded border">Aviso</span>
+                        </div>
+                    `);
+                }
+            });
+
+            contenedor.innerHTML = alertasHTML.join('');
+        }
+
         function abrirModalSalon(id = null) {
             document.getElementById('modal-salon').classList.remove('hidden');
             document.getElementById('form-salon').reset();
@@ -385,16 +475,16 @@
 
             if (id) {
                 document.getElementById('modal-salon-titulo').innerText = 'Modificar Apartado';
-                const r = reservasSalones.find(x => x.id === id);
+                const r = reservasSalones.find(x => String(x.id) === String(id));
                 if (r) {
                     document.getElementById('ms-id').value = r.id;
-                    document.getElementById('ms-salon').value = r.salon;
-                    document.getElementById('ms-titulo').value = r.titulo;
-                    document.getElementById('ms-resp').value = r.resp;
-                    document.getElementById('ms-fec').value = r.fec;
-                    document.getElementById('ms-ini').value = r.ini;
-                    document.getElementById('ms-fin').value = r.fin;
-                    document.getElementById('ms-obs').value = r.obs;
+                    document.getElementById('ms-salon').value = r.salon || '';
+                    document.getElementById('ms-titulo').value = r.titulo || '';
+                    document.getElementById('ms-resp').value = r.resp || '';
+                    document.getElementById('ms-fec').value = r.fec || '';
+                    document.getElementById('ms-ini').value = r.ini || '';
+                    document.getElementById('ms-fin').value = r.fin || '';
+                    document.getElementById('ms-obs').value = r.obs || '';
                 }
             } else {
                 document.getElementById('modal-salon-titulo').innerText = 'Apartar Salón';
@@ -402,11 +492,19 @@
             }
         }
 
-        function cerrarModalSalon() { document.getElementById('modal-salon').classList.add('hidden'); }
+        function cerrarModalSalon() { 
+            document.getElementById('modal-salon').classList.add('hidden'); 
+        }
 
-        function guardarSalón(e) {
+        function guardarSalon(e) {
             e.preventDefault();
-            const id = document.getElementById('ms-id').value || Date.now().toString();
+            
+            // Generar o tomar ID de forma segura
+            let id = document.getElementById('ms-id').value;
+            if (!id) {
+                id = db.ref('salones').push().key; // Usar Push Key de Firebase si es nuevo
+            }
+
             const salon = document.getElementById('ms-salon').value;
             const titulo = document.getElementById('ms-titulo').value;
             const resp = document.getElementById('ms-resp').value;
@@ -415,32 +513,51 @@
             const fin = document.getElementById('ms-fin').value;
             const obs = document.getElementById('ms-obs').value;
 
-            if (ini >= fin) { alert('La hora de fin debe ser mayor a la hora de inicio.'); return; }
+            if (ini >= fin) { 
+                mostrarToast('La hora de fin debe ser mayor a la hora de inicio.', 'error'); 
+                return; 
+            }
 
+            // Validación de cruces
             const hayCruce = reservasSalones.some(r => {
-                if (r.id === id) return false;
+                if (String(r.id) === String(id)) return false;
                 if (r.salon === salon && r.fec === fec && r.estado !== 'Cancelado') {
                     if (ini < r.fin && fin > r.ini) return true;
                 }
                 return false;
             });
 
-            if (hayCruce) { alert(`⚠️ CONFLICTO: El salón "${salon}" ya está apartado en ese horario el día ${fec}.`); return; }
+            if (hayCruce) { 
+                mostrarToast(`⚠️ CONFLICTO: El salón "${salon}" ya está apartado en ese horario el día ${fec}.`, 'error'); 
+                return; 
+            }
+
+            const btnSubmit = document.getElementById('btn-submit-salon');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Guardando...</span>`;
 
             const objSalon = { id, salon, titulo, resp, fec, ini, fin, obs, estado: 'Confirmado' };
 
-            db.ref('salones/' + id).set(objSalon, (error) => {
-                if (error) {
-                    alert('Error al guardar en la nube.');
-                } else {
-                    cerrarModalSalon();
-                }
+            db.ref('salones/' + id).set(objSalon)
+            .then(() => {
+                cerrarModalSalon();
+                mostrarToast('Reserva de salón guardada con éxito.');
+            })
+            .catch(error => {
+                console.error("Error guardando en Firebase:", error);
+                mostrarToast('Error al guardar en Firebase: ' + error.message, 'error');
+            })
+            .finally(() => {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<span>Guardar Apartado</span>`;
             });
         }
 
         function eliminarSalon(id) {
-            if (confirm('¿Eliminar este registro?')) {
-                db.ref('salones/' + id).remove();
+            if (confirm('¿Eliminar este registro de apartado?')) {
+                db.ref('salones/' + id).remove()
+                .then(() => mostrarToast('Registro eliminado correctamente.'))
+                .catch(err => mostrarToast('Error al eliminar: ' + err.message, 'error'));
             }
         }
 
@@ -482,11 +599,14 @@
                 return true;
             });
 
-            if (filtrados.length === 0) { alert('No hay datos para exportar con los filtros actuales.'); return; }
+            if (filtrados.length === 0) { 
+                mostrarToast('No hay datos para exportar con los filtros actuales.', 'error'); 
+                return; 
+            }
 
             let csv = '\ufeffSalón,Actividad / Título,Responsable,Fecha,Hora Inicio,Hora Fin,Estado,Observaciones\n';
             filtrados.forEach(r => {
-                csv += `"${r.salon}","${r.titulo.replace(/"/g, '""')}","${r.resp.replace(/"/g, '""')}","${r.fec}","${r.ini}","${r.fin}","${r.estado}","${(r.obs || '').replace(/"/g, '""')}"\n`;
+                csv += `"${r.salon}","${(r.titulo || '').replace(/"/g, '""')}","${(r.resp || '').replace(/"/g, '""')}","${r.fec}","${r.ini}","${r.fin}","${r.estado}","${(r.obs || '').replace(/"/g, '""')}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -566,7 +686,6 @@
             }).join('');
         }
 
-        // AGENDA DYS
         function abrirModalAgenda(id = null) {
             document.getElementById('modal-agenda').classList.remove('hidden');
             document.getElementById('form-agenda').reset();
@@ -574,16 +693,16 @@
 
             if (id) {
                 document.getElementById('modal-agenda-titulo').innerText = 'Modificar Evento';
-                const ev = eventosAgenda.find(x => x.id === id);
+                const ev = eventosAgenda.find(x => String(x.id) === String(id));
                 if (ev) {
                     document.getElementById('ma-id').value = ev.id;
-                    document.getElementById('ma-titulo').value = ev.titulo;
-                    document.getElementById('ma-tipo').value = ev.tipo;
-                    document.getElementById('ma-lugar').value = ev.lugar;
-                    document.getElementById('ma-fec').value = ev.fec;
-                    document.getElementById('ma-hora').value = ev.hora;
-                    document.getElementById('ma-dur').value = ev.dur;
-                    document.getElementById('ma-notas').value = ev.notas;
+                    document.getElementById('ma-titulo').value = ev.titulo || '';
+                    document.getElementById('ma-tipo').value = ev.tipo || 'Comité';
+                    document.getElementById('ma-lugar').value = ev.lugar || '';
+                    document.getElementById('ma-fec').value = ev.fec || '';
+                    document.getElementById('ma-hora').value = ev.hora || '';
+                    document.getElementById('ma-fin').value = ev.fin || '';
+                    document.getElementById('ma-notas').value = ev.notas || '';
                 }
             } else {
                 document.getElementById('modal-agenda-titulo').innerText = 'Programar Evento';
@@ -591,40 +710,66 @@
             }
         }
 
-        function cerrarModalAgenda() { document.getElementById('modal-agenda').classList.add('hidden'); }
+        function cerrarModalAgenda() { 
+            document.getElementById('modal-agenda').classList.add('hidden'); 
+        }
 
         function guardarEvento(e) {
             e.preventDefault();
-            const id = document.getElementById('ma-id').value || Date.now().toString();
+
+            let id = document.getElementById('ma-id').value;
+            if (!id) {
+                id = db.ref('agenda').push().key; // Generar clave Push de Firebase si no existe
+            }
+
             const titulo = document.getElementById('ma-titulo').value;
             const tipo = document.getElementById('ma-tipo').value;
             const lugar = document.getElementById('ma-lugar').value;
             const fec = document.getElementById('ma-fec').value;
             const hora = document.getElementById('ma-hora').value;
-            const dur = document.getElementById('ma-dur').value;
+            const fin = document.getElementById('ma-fin').value;
             const notas = document.getElementById('ma-notas').value;
 
-            const eventoExistente = eventosAgenda.find(x => x.id === id);
+            if (hora && fin && hora >= fin) {
+                mostrarToast('La hora de fin del evento debe ser mayor a la hora de inicio.', 'error');
+                return;
+            }
+
+            const eventoExistente = eventosAgenda.find(x => String(x.id) === String(id));
             const estado = eventoExistente ? eventoExistente.estado : 'Programado';
 
-            const objEvento = { id, titulo, tipo, lugar, fec, hora, dur, notas, estado };
+            const btnSubmit = document.getElementById('btn-submit-agenda');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Guardando...</span>`;
 
-            db.ref('agenda/' + id).set(objEvento, (error) => {
-                if (error) {
-                    alert('Error al guardar evento.');
-                } else {
-                    cerrarModalAgenda();
-                }
+            const objEvento = { id, titulo, tipo, lugar, fec, hora, fin, notas, estado };
+
+            db.ref('agenda/' + id).set(objEvento)
+            .then(() => {
+                cerrarModalAgenda();
+                mostrarToast('Evento programado con éxito.');
+            })
+            .catch(error => {
+                console.error("Error guardando en Firebase:", error);
+                mostrarToast('Error al guardar evento en Firebase: ' + error.message, 'error');
+            })
+            .finally(() => {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<span>Guardar Evento</span>`;
             });
         }
 
         function cambiarEstadoEvento(id, est) {
-            db.ref('agenda/' + id + '/estado').set(est);
+            db.ref('agenda/' + id + '/estado').set(est)
+            .then(() => mostrarToast(`Evento marcado como ${est}.`))
+            .catch(err => mostrarToast('Error al actualizar estado: ' + err.message, 'error'));
         }
 
         function eliminarEvento(id) {
             if (confirm('¿Eliminar este evento?')) {
-                db.ref('agenda/' + id).remove();
+                db.ref('agenda/' + id).remove()
+                .then(() => mostrarToast('Evento eliminado correctamente.'))
+                .catch(err => mostrarToast('Error al eliminar: ' + err.message, 'error'));
             }
         }
 
@@ -666,11 +811,14 @@
                 return true;
             });
 
-            if (filtrados.length === 0) { alert('No hay eventos para exportar con los filtros actuales.'); return; }
+            if (filtrados.length === 0) { 
+                mostrarToast('No hay eventos para exportar con los filtros actuales.', 'error'); 
+                return; 
+            }
 
-            let csv = '\ufeffTipo,Título del Evento,Lugar,Fecha,Hora,Duración,Estado,Notas\n';
+            let csv = '\ufeffTipo,Título del Evento,Lugar,Fecha,Hora Inicio,Hora Fin,Estado,Notas\n';
             filtrados.forEach(ev => {
-                csv += `"${ev.tipo}","${ev.titulo.replace(/"/g, '""')}","${(ev.lugar || '').replace(/"/g, '""')}","${ev.fec}","${ev.hora}","${(ev.dur || '').replace(/"/g, '""')}","${ev.estado}","${(ev.notas || '').replace(/"/g, '""')}"\n`;
+                csv += `"${ev.tipo}","${(ev.titulo || '').replace(/"/g, '""')}","${(ev.lugar || '').replace(/"/g, '""')}","${ev.fec}","${ev.hora}","${(ev.fin || '').replace(/"/g, '""')}","${ev.estado}","${(ev.notas || '').replace(/"/g, '""')}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -723,7 +871,7 @@
                             <h4 class="font-bold text-slate-900 text-sm">${ev.titulo}</h4>
                             <div class="text-xs text-slate-500 flex flex-wrap gap-x-3 gap-y-0.5">
                                 <span><i class="fa-regular fa-calendar mr-1"></i>${ev.fec}</span>
-                                <span><i class="fa-regular fa-clock mr-1"></i>${ev.hora} ${ev.dur ? '('+ev.dur+')' : ''}</span>
+                                <span><i class="fa-regular fa-clock mr-1"></i>${ev.hora} ${ev.fin ? ' - ' + ev.fin : ''}</span>
                                 <span><i class="fa-solid fa-location-dot mr-1"></i>${ev.lugar || 'No especificado'}</span>
                             </div>
                             ${ev.notas ? `<div class="text-xs text-slate-400 italic">${ev.notas}</div>` : ''}
